@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import ListingResult from "@/components/listings/ListingResult";
+import type { AmazonListing } from "@/types/listing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -57,6 +60,10 @@ function ErrorText({ message }: { message?: string }) {
 /* ------------------------------- component ------------------------------ */
 
 export default function ProductForm() {
+  const [listing, setListing] = useState<AmazonListing | null>(null);
+const [loading, setLoading] = useState(false);
+const [apiError, setApiError] = useState<string | null>(null);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: "onTouched",
@@ -70,6 +77,7 @@ export default function ProductForm() {
       platforms: [],
     },
   });
+
 
   const { errors } = form.formState;
 
@@ -85,12 +93,47 @@ export default function ProductForm() {
     form.setValue("platforms", next, { shouldValidate: true });
   }
 
-  function onSubmit(values: FormValues) {
-    // temporary — backend wiring comes in Step 5
-    alert(JSON.stringify(values, null, 2));
+async function onSubmit(values: FormValues) {
+  setLoading(true);
+  setApiError(null);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || data.message || "Failed to generate listing"
+      );
+    }
+
+    if (!data.listing) {
+      throw new Error("The API returned an empty listing");
+    }
+
+    setListing(data.listing);
+  } catch (error) {
+    console.error("Generation error:", error);
+
+    setApiError(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong while generating the listing"
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
+      <>
     <form
       onSubmit={form.handleSubmit(onSubmit)}
       className="mx-auto max-w-2xl space-y-6"
@@ -197,9 +240,31 @@ export default function ProductForm() {
         <ErrorText message={errors.platforms?.message} />
       </div>
 
-      <Button type="submit" size="lg" className="w-full">
-        Generate Listing
+{apiError && (
+        <div
+          role="alert"
+          className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
+          {apiError}
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={loading}
+      >
+        {loading ? "Generating..." : "Generate Listing"}
       </Button>
     </form>
-  );
+
+    {listing && (
+      <ListingResult
+        listing={listing}
+        onChange={setListing}
+      />
+    )}
+  </>
+);
 }

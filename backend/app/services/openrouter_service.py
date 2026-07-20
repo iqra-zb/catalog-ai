@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -38,4 +39,11 @@ def generate_listing(prompt: str):
 
     data = response.json()
 
-    return data["choices"][0]["message"]["content"]
+    content = data["choices"][0]["message"]["content"]
+    content = content.replace("```json", "")
+    content = content.replace("```", "")
+    content = content.strip()
+
+    return json.loads(content)
+
+ 
