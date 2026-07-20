@@ -1,12 +1,20 @@
 # CatalogAI
 
-AI-powered marketplace listing generator.
+AI-powered ecommerce listing generator for Amazon, Shopify, Etsy, Walmart, eBay, and TikTok Shop.
 
 ## Tech Stack
 
 - Next.js
 - FastAPI
-- PostgreSQL (Supabase)
+- OpenRouter
+- PostgreSQL (planned)
 - Tailwind CSS
-- Shadcn UI
-- OpenRouter / Gemini
+- TypeScript
+
+## Features
+
+- AI Listing Generation
+- Marketplace-specific optimization
+- Multi-platform support
+- SEO optimization
+- CSV export (planned)
