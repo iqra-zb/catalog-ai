@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+
+
 from app.models.product import ProductRequest
 from app.services.openrouter_service import generate_listing
 
