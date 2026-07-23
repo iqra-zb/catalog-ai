@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import ListingResult from "@/components/listings/ListingResult";
-import type { AmazonListing } from "@/types/listing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
+import ListingTabs from "@/components/listings/ListingTabs";
+
+import type { ListingResults } from "@/types/listing";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,9 +62,9 @@ function ErrorText({ message }: { message?: string }) {
 /* ------------------------------- component ------------------------------ */
 
 export default function ProductForm() {
-  const [listing, setListing] = useState<AmazonListing | null>(null);
-const [loading, setLoading] = useState(false);
-const [apiError, setApiError] = useState<string | null>(null);
+  const [listing, setListing] = useState<ListingResults | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -114,11 +116,11 @@ async function onSubmit(values: FormValues) {
       );
     }
 
-    if (!data.listing) {
-      throw new Error("The API returned an empty listing");
+    if (!data.results) {
+        throw new Error("The API returned no results");
     }
 
-    setListing(data.listing);
+    setListing(data.results);
   } catch (error) {
     console.error("Generation error:", error);
 
@@ -259,12 +261,11 @@ async function onSubmit(values: FormValues) {
       </Button>
     </form>
 
-    {listing && (
-      <ListingResult
-        listing={listing}
-        onChange={setListing}
-      />
-    )}
+   {listing && (
+    <ListingTabs
+        results={listing}
+    />
+)}
   </>
 );
 }
